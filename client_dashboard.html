@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة التحكم | إدارة المطعم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>body { font-family: 'Tajawal', sans-serif; background-color: #f3f4f6; }</style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-white hidden md:flex flex-col border-l">
+            <div class="p-6 text-center border-b">
+                <img id="rest-logo" src="images/logo.png" class="w-16 h-16 mx-auto rounded-xl mb-2 bg-gray-50 p-1">
+                <h2 id="rest-name" class="font-bold text-lg">جاري التحميل...</h2>
+            </div>
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" class="flex items-center gap-3 bg-orange-50 text-orange-600 px-4 py-3 rounded-xl font-bold"><i class="fa-solid fa-burger"></i> المنتجات</a>
+                <a href="menu.html?id=wow-bechamel" target="_blank" class="flex items-center gap-3 text-gray-600 hover:bg-gray-50 px-4 py-3 rounded-xl font-bold transition"><i class="fa-solid fa-eye"></i> معاينة المنيو</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-black text-gray-800">إدارة المنيو 🍔</h1>
+                <div class="bg-white px-4 py-2 rounded-lg shadow-sm font-mono text-sm text-gray-500">
+                    ID: <span id="rest-id-display">...</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8 h-64">
+                <canvas id="statsChart"></canvas>
+            </div>
+
+            <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div onclick="openModal()" class="bg-white border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center p-10 cursor-pointer hover:border-orange-500 hover:bg-orange-50 transition min-h-[200px]">
+                    <i class="fa-solid fa-plus text-4xl text-gray-300 mb-2"></i>
+                    <span class="text-gray-500 font-bold">إضافة منتج</span>
+                </div>
+                </div>
+        </main>
+    </div>
+
+    <div id="product-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 backdrop-blur-sm px-4">
+        <div class="bg-white p-6 rounded-2xl w-full max-w-lg shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">بيانات المنتج</h3>
+            <div class="space-y-3">
+                <input id="p_name" type="text" class="w-full bg-gray-50 border rounded-lg p-3 outline-none" placeholder="اسم المنتج (عربي)">
+                <div class="grid grid-cols-2 gap-3">
+                    <input id="p_price" type="number" class="w-full bg-gray-50 border rounded-lg p-3 outline-none" placeholder="السعر">
+                    <select id="p_cat" class="w-full bg-gray-50 border rounded-lg p-3 outline-none">
+                        <option value="عروض">عروض</option>
+                        <option value="أطباق">أطباق</option>
+                        <option value="حلا">حلا</option>
+                        <option value="مشروبات">مشروبات</option>
+                    </select>
+                </div>
+                <input id="p_img" type="text" class="w-full bg-gray-50 border rounded-lg p-3 outline-none" placeholder="رابط الصورة (images/pic.jpg)">
+                <textarea id="p_desc" class="w-full bg-gray-50 border rounded-lg p-3 outline-none h-20" placeholder="وصف المنتج..."></textarea>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="saveProduct()" class="flex-1 bg-orange-500 text-white py-3 rounded-xl font-bold">حفظ</button>
+                <button onclick="closeModal()" class="flex-1 bg-gray-200 text-gray-700 py-3 rounded-xl font-bold">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, doc, getDoc, updateDoc, arrayUnion } from './firebase-config.js';
+
+        // ⚠️ هام: هنا بنحدد احنا فاتحين مطعم مين.
+        // عشان التجربة، هنثبته على "wow-bechamel" اللي عملناه في الخطوة اللي فاتت.
+        const restaurantId = "wow-bechamel"; 
+        
+        document.getElementById('rest-id-display').innerText = restaurantId;
+
+        // 1. تحميل البيانات
+        async function loadData() {
+            try {
+                const docRef = doc(db, "restaurants", restaurantId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // تحديث الواجهة
+                    document.getElementById('rest-name').innerText = data.name;
+                    renderChart(data.stats);
+                    renderProducts(data.products || []);
+                } else {
+                    alert("المطعم غير موجود! تأكد من إنشاءه في Super Admin");
+                }
+            } catch (e) {
+                console.error(e);
+                alert("خطأ في التحميل: " + e.message);
+            }
+        }
+
+        // 2. عرض المنتجات
+        function renderProducts(products) {
+            const grid = document.getElementById('products-grid');
+            // مسح القديم ماعدا زر الإضافة
+            const addBtn = grid.firstElementChild.outerHTML;
+            grid.innerHTML = addBtn;
+
+            products.forEach(p => {
+                grid.innerHTML += `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group">
+                    <img src="${p.image}" class="h-40 w-full object-cover" onerror="this.src='images/logo.png'">
+                    <div class="p-4">
+                        <div class="flex justify-between font-bold">
+                            <h3>${p.name}</h3>
+                            <span class="text-orange-500">${p.price} ر.س</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">${p.category}</p>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // 3. حفظ منتج جديد
+        window.saveProduct = async function() {
+            const newProd = {
+                name: document.getElementById('p_name').value,
+                price: Number(document.getElementById('p_price').value),
+                category: document.getElementById('p_cat').value,
+                image: document.getElementById('p_img').value || "images/logo.png",
+                description: document.getElementById('p_desc').value
+            };
+
+            try {
+                await updateDoc(doc(db, "restaurants", restaurantId), {
+                    products: arrayUnion(newProd)
+                });
+                alert("✅ تم الحفظ!");
+                closeModal();
+                loadData(); // ريفرش للبيانات
+            } catch (e) {
+                alert("خطأ: " + e.message);
+            }
+        }
+
+        // 4. الرسم البياني (Chart)
+        function renderChart(stats) {
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                    datasets: [{
+                        label: 'زيارات المنيو',
+                        data: [5, 10, 15, 8, 20, 25, stats.views || 0],
+                        borderColor: '#FF9F1C',
+                        backgroundColor: '#FF9F1C20',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // دوال المودال
+        window.openModal = () => document.getElementById('product-modal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('product-modal').style.display = 'none';
+
+        // تشغيل
+        loadData();
+    </script>
+</body>
+</html>

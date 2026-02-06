@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محفظة النقاط | واو بشاميل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #f8fafc; }
+        
+        /* الكارت الذهبي */
+        .loyalty-card {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border-radius: 25px; padding: 25px; color: white;
+            position: relative; overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(49, 46, 129, 0.5);
+            min-height: 200px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card-pattern {
+            position: absolute; top: -50px; right: -50px; width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none;
+        }
+        .gold-text {
+            background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+            -webkit-background-clip: text; color: transparent; font-weight: 900;
+        }
+
+        /* شريط التقدم */
+        .progress-container { background: rgba(255,255,255,0.1); height: 8px; border-radius: 10px; overflow: hidden; margin-top: 10px; }
+        .progress-bar { background: linear-gradient(90deg, #FBBF24, #F59E0B); height: 100%; width: 70%; border-radius: 10px; position: relative; }
+        .progress-glow { position: absolute; right: 0; top: 0; bottom: 0; width: 10px; background: white; filter: blur(5px); opacity: 0.7; }
+
+        /* كروت المكافآت */
+        .reward-card {
+            background: white; border-radius: 18px; padding: 15px;
+            border: 1px solid #f3f4f6; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            display: flex; align-items: center; justify-content: space-between;
+            transition: 0.3s;
+        }
+        .reward-card.locked { opacity: 0.6; filter: grayscale(1); pointer-events: none; }
+        
+        /* الباركود */
+        .barcode-box { background: white; padding: 15px; border-radius: 15px; display: flex; flex-col; align-items: center; justify-content: center; gap: 5px; }
+        .barcode-lines { height: 50px; width: 100%; background-image: repeating-linear-gradient(90deg, black 0px, black 2px, transparent 2px, transparent 4px, black 4px, black 7px, transparent 7px, transparent 9px); }
+    </style>
+</head>
+<body class="pb-10">
+
+    <div class="p-6 flex justify-between items-center bg-white shadow-sm sticky top-0 z-50">
+        <h2 class="text-xl font-bold text-gray-800" id="page-title">محفظة النقاط</h2>
+        <div class="flex gap-3">
+            <button onclick="toggleLang()" id="lang-btn" class="bg-gray-100 w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs border border-gray-200">EN</button>
+            <a href="index.html" class="bg-yellow-400 w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md"><i class="fa-solid fa-house"></i></a>
+        </div>
+    </div>
+
+    <main class="p-6 space-y-8">
+
+        <div class="loyalty-card">
+            <div class="card-pattern"></div>
+            
+            <div class="flex justify-between items-start z-10">
+                <div>
+                    <p class="text-xs text-indigo-200 font-medium" id="card-rank-label">عضوية ذهبية</p>
+                    <h3 class="text-2xl gold-text tracking-wide"><i class="fa-solid fa-crown mr-1"></i> GOLD</h3>
+                </div>
+                <img src="images/logo.png" onerror="this.src='https://placehold.co/50'" class="w-12 opacity-80 bg-white/20 rounded-full p-1">
+            </div>
+
+            <div class="z-10 mt-4">
+                <h1 class="text-4xl font-black text-white">1,250</h1>
+                <p class="text-[10px] text-indigo-200 mt-1" id="card-points-label">نقطة متاحة</p>
+                
+                <div class="mt-4">
+                    <div class="flex justify-between text-[10px] text-white mb-1">
+                        <span id="next-reward-txt">المكافأة التالية: طاجن مجاني</span>
+                        <span>70%</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar"><div class="progress-glow"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="z-10 mt-4 flex justify-between items-end">
+                <div>
+                    <p class="text-[9px] text-indigo-300 uppercase">Member Name</p>
+                    <p class="font-bold text-white tracking-wider">MOHAMED AHMED</p>
+                </div>
+                <i class="fa-brands fa-cc-visa text-3xl text-white/50"></i>
+            </div>
+        </div>
+
+        <div class="barcode-box shadow-md border border-gray-100">
+            <p class="text-xs text-gray-400 font-bold mb-1" id="scan-txt">امسح الكود عند الكاشير</p>
+            <div class="barcode-lines"></div>
+            <p class="text-sm font-mono font-bold text-gray-800 tracking-widest mt-1">8849 2023 4410</p>
+        </div>
+
+        <div>
+            <h3 class="font-bold text-gray-800 text-lg mb-4 flex items-center gap-2" id="rewards-title">
+                <i class="fa-solid fa-gift text-purple-500"></i> المكافآت المتاحة
+            </h3>
+            
+            <div class="space-y-3">
+                
+                <div class="reward-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-xl"><i class="fa-solid fa-bottle-water"></i></div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-800" id="r1-title">بيبسي مجاناً</h4>
+                            <p class="text-[10px] text-gray-500" id="r1-desc">مقابل 500 نقطة</p>
+                        </div>
+                    </div>
+                    <button class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-700 transition" id="btn-redeem">استبدال</button>
+                </div>
+
+                <div class="reward-card">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-xl"><i class="fa-solid fa-bowl-food"></i></div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-800" id="r2-title">طاجن صغير</h4>
+                            <p class="text-[10px] text-gray-500" id="r2-desc">مقابل 1000 نقطة</p>
+                        </div>
+                    </div>
+                    <button class="bg-purple-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-purple-700 transition" id="btn-redeem-2">استبدال</button>
+                </div>
+
+                <div class="reward-card locked">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 text-xl"><i class="fa-solid fa-utensils"></i></div>
+                        <div>
+                            <h4 class="font-bold text-gray-500" id="r3-title">وجبة عائلية</h4>
+                            <p class="text-[10px] text-gray-400" id="r3-desc">تحتاج 2000 نقطة</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-100 text-gray-400 px-3 py-2 rounded-lg text-xs font-bold"><i class="fa-solid fa-lock"></i></div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Language Toggle Logic
+        function toggleLang() {
+            const html = document.documentElement;
+            const btn = document.getElementById('lang-btn');
+            
+            const txt = {
+                ar: {
+                    title: 'محفظة النقاط',
+                    rank: 'عضوية ذهبية', pointsLbl: 'نقطة متاحة',
+                    nextR: 'المكافأة التالية: طاجن مجاني',
+                    scan: 'امسح الكود عند الكاشير',
+                    rewardsT: 'المكافآت المتاحة',
+                    r1: 'بيبسي مجاناً', r1d: 'مقابل 500 نقطة',
+                    r2: 'طاجن صغير', r2d: 'مقابل 1000 نقطة',
+                    r3: 'وجبة عائلية', r3d: 'تحتاج 2000 نقطة',
+                    redeem: 'استبدال'
+                },
+                en: {
+                    title: 'Loyalty Wallet',
+                    rank: 'Gold Member', pointsLbl: 'Points Available',
+                    nextR: 'Next Reward: Free Casserole',
+                    scan: 'Scan at cashier',
+                    rewardsT: 'Available Rewards',
+                    r1: 'Free Pepsi', r1d: 'For 500 Points',
+                    r2: 'Small Casserole', r2d: 'For 1000 Points',
+                    r3: 'Family Meal', r3d: 'Needs 2000 Points',
+                    redeem: 'Redeem'
+                }
+            };
+
+            const isRTL = html.dir === 'rtl';
+            
+            if(isRTL) {
+                html.dir = 'ltr'; html.lang = 'en'; btn.innerText = 'AR';
+                updateText(txt.en);
+            } else {
+                html.dir = 'rtl'; html.lang = 'ar'; btn.innerText = 'EN';
+                updateText(txt.ar);
+            }
+        }
+
+        function updateText(t) {
+            document.getElementById('page-title').innerText = t.title;
+            document.getElementById('card-rank-label').innerText = t.rank;
+            document.getElementById('card-points-label').innerText = t.pointsLbl;
+            document.getElementById('next-reward-txt').innerText = t.nextR;
+            document.getElementById('scan-txt').innerText = t.scan;
+            document.getElementById('rewards-title').innerHTML = `<i class="fa-solid fa-gift text-purple-500"></i> ${t.rewardsT}`;
+            
+            document.getElementById('r1-title').innerText = t.r1; document.getElementById('r1-desc').innerText = t.r1d;
+            document.getElementById('r2-title').innerText = t.r2; document.getElementById('r2-desc').innerText = t.r2d;
+            document.getElementById('r3-title').innerText = t.r3; document.getElementById('r3-desc').innerText = t.r3d;
+            
+            document.querySelectorAll('#btn-redeem, #btn-redeem-2').forEach(b => b.innerText = t.redeem);
+        }
+    </script>
+
+</body>
+</html>

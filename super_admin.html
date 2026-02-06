@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>i-Code | الإدارة العليا</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>body { font-family: 'Tajawal', sans-serif; background-color: #0f172a; color: white; }</style>
+</head>
+<body class="p-10">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10 border-b border-gray-700 pb-5">
+            <div class="flex items-center gap-4">
+                <img src="images/logo.png" class="w-12 h-12 rounded-lg bg-white p-1" onerror="this.src='https://via.placeholder.com/50'">
+                <div>
+                    <h1 class="text-2xl font-black text-blue-500">i-Code <span class="text-white">Manager</span></h1>
+                    <p class="text-gray-400 text-sm">لوحة إدارة المشتركين</p>
+                </div>
+            </div>
+            <button onclick="openModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 transition">
+                <i class="fa-solid fa-user-plus"></i> مشترك جديد
+            </button>
+        </div>
+
+        <div id="add-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-sm">
+            <div class="bg-gray-800 p-8 rounded-2xl w-full max-w-md border border-gray-600 shadow-2xl">
+                <h3 class="text-2xl font-bold mb-6 text-white">إضافة مشترك جديد</h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">اسم المطعم</label>
+                        <input type="text" id="clientName" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="مثال: واو بشاميل">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">البريد الإلكتروني</label>
+                        <input type="email" id="clientEmail" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="admin@restaurant.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">كلمة المرور</label>
+                        <input type="password" id="clientPass" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="********">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">معرف الرابط (Unique ID)</label>
+                        <input type="text" id="clientId" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-3 text-white focus:border-blue-500 outline-none" placeholder="ex: wow-bechamel">
+                        <p class="text-xs text-gray-500 mt-1">هام: هذا الاسم سيظهر في رابط المنيو</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                    <button onclick="createClient()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition">إنشاء حساب</button>
+                    <button onclick="closeModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 rounded-xl font-bold transition">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, auth, setDoc, doc, createUserWithEmailAndPassword } from './firebase-config.js';
+
+        // دالة الإنشاء
+        window.createClient = async function() {
+            const name = document.getElementById('clientName').value;
+            const email = document.getElementById('clientEmail').value;
+            const password = document.getElementById('clientPass').value;
+            const uniqueId = document.getElementById('clientId').value;
+
+            if(!name || !email || !password || !uniqueId) {
+                alert("⚠️ يرجى ملء جميع البيانات!");
+                return;
+            }
+
+            try {
+                // 1. إنشاء يوزر في Firebase Auth
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2. حفظ بيانات المطعم في Firestore
+                await setDoc(doc(db, "restaurants", uniqueId), {
+                    ownerId: user.uid,
+                    name: name,
+                    email: email,
+                    themeColor: "#FF9F1C",
+                    logo: "images/logo.png",
+                    products: [],
+                    stats: { views: 0, orders: 0 },
+                    isActive: true,
+                    createdAt: new Date().toISOString()
+                });
+
+                alert(`✅ تم بنجاح!\nاسم المستخدم: ${email}\nكلمة المرور: ${password}\nالرابط: menu.html?id=${uniqueId}`);
+                closeModal();
+                // تفريغ الخانات
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientEmail').value = '';
+                document.getElementById('clientPass').value = '';
+                document.getElementById('clientId').value = '';
+
+            } catch (error) {
+                console.error("Error:", error);
+                let msg = error.message;
+                if(error.code === 'auth/email-already-in-use') msg = "هذا الإيميل مستخدم من قبل!";
+                if(error.code === 'auth/weak-password') msg = "كلمة المرور ضعيفة (6 حروف على الأقل)!";
+                alert("❌ خطأ: " + msg);
+            }
+        }
+
+        // دوال المودال
+        window.openModal = function() { document.getElementById('add-modal').style.display = 'flex'; }
+        window.closeModal = function() { document.getElementById('add-modal').style.display = 'none'; }
+    </script>
+</body>
+</html>

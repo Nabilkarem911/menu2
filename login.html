@@ -1,0 +1,130 @@
+!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل عضويتك | واو بشاميل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #ffffff; }
+        
+        /* تصميم الحقول */
+        .input-group label { display: block; font-weight: bold; color: #4B5563; margin-bottom: 8px; font-size: 14px; text-align: right; }
+        .input-field { 
+            width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid #E5E7EB; 
+            outline: none; transition: 0.3s; background: #fff; text-align: right; font-size: 14px;
+        }
+        .input-field:focus { border-color: #FBBF24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
+        .input-field::placeholder { color: #9CA3AF; }
+
+        /* الأزرار العلوية (التابات) */
+        .tab-btn {
+            padding: 10px; border-radius: 12px; font-weight: bold; font-size: 14px;
+            transition: all 0.3s; border: 1px solid #FBBF24; width: 48%; text-align: center; cursor: pointer;
+        }
+        .tab-active { background-color: #FBBF24; color: #fff; }
+        .tab-inactive { background-color: #fff; color: #F59E0B; }
+
+        /* زر الإرسال */
+        .submit-btn {
+            width: 100%; background-color: #FBBF24; color: #fff; font-weight: bold;
+            padding: 14px; border-radius: 15px; margin-top: 20px; font-size: 16px;
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3); transition: 0.2s;
+        }
+        .submit-btn:active { transform: scale(0.98); }
+
+        /* زر العودة */
+        .back-btn {
+            width: 45px; height: 45px; background: #FBBF24; border-radius: 12px; border-bottom-right-radius: 25px;
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-6">
+
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-800" style="color: #4338ca;">سجل عضويتك</h1>
+        <a href="index.html" class="back-btn"><i class="fa-solid fa-chevron-left"></i></a>
+    </div>
+
+    <div class="flex justify-between mb-8">
+        <div onclick="switchTab('login')" id="tab-login" class="tab-btn tab-active">تسجيل دخول</div>
+        <div onclick="switchTab('register')" id="tab-register" class="tab-btn tab-inactive">تسجيل جديد</div>
+    </div>
+
+    <div id="login-image" class="flex justify-center mb-6">
+        <div class="w-40 h-40 bg-white rounded-full flex items-center justify-center border-4 border-yellow-100 shadow-sm">
+            <img src="images/login-img.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2335/2335261.png'" class="w-28 opacity-80">
+        </div>
+    </div>
+
+    <form class="flex flex-col gap-4">
+        
+        <div class="input-group hidden" id="field-name">
+            <label>الاسم</label>
+            <input type="text" placeholder="اكتب الاسم هنا" class="input-field">
+        </div>
+
+        <div class="input-group">
+            <label>رقم جوال</label>
+            <input type="tel" placeholder="سجل رقم الجوال" class="input-field" dir="rtl">
+        </div>
+
+        <div class="input-group">
+            <label>كلمة المرور</label>
+            <input type="password" placeholder="اكتب كلمة المرور" class="input-field">
+        </div>
+
+        <div class="input-group hidden" id="field-confirm">
+            <label>تأكيد كلمة المرور</label>
+            <input type="password" placeholder="تأكيد كلمة المرور" class="input-field">
+        </div>
+
+        <button type="button" onclick="window.location.href='index.html'" class="submit-btn" id="btn-text">
+            تسجيل الدخول
+        </button>
+
+    </form>
+
+    <script>
+        function switchTab(type) {
+            // العناصر
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const fieldName = document.getElementById('field-name');
+            const fieldConfirm = document.getElementById('field-confirm');
+            const loginImage = document.getElementById('login-image');
+            const btnText = document.getElementById('btn-text');
+
+            if (type === 'login') {
+                // تفعيل تاب الدخول
+                tabLogin.classList.add('tab-active'); tabLogin.classList.remove('tab-inactive');
+                tabRegister.classList.remove('tab-active'); tabRegister.classList.add('tab-inactive');
+                
+                // إظهار الصورة وإخفاء حقول التسجيل الزيادة
+                loginImage.classList.remove('hidden');
+                fieldName.classList.add('hidden');
+                fieldConfirm.classList.add('hidden');
+                
+                // تغيير نص الزر
+                btnText.innerText = "تسجيل الدخول";
+            } else {
+                // تفعيل تاب التسجيل الجديد
+                tabRegister.classList.add('tab-active'); tabRegister.classList.remove('tab-inactive');
+                tabLogin.classList.remove('tab-active'); tabLogin.classList.add('tab-inactive');
+                
+                // إخفاء الصورة وإظهار كل الحقول
+                loginImage.classList.add('hidden');
+                fieldName.classList.remove('hidden');
+                fieldConfirm.classList.remove('hidden');
+                
+                // تغيير نص الزر
+                btnText.innerText = "تسجيل";
+            }
+        }
+    </script>
+
+</body>
+</html>

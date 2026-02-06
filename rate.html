@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قيم تجربتك | واو بشاميل</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Tajawal', sans-serif; background-color: #ffffff; }
+        .rating-box { border: 2px solid #FBBF24; border-radius: 20px; padding: 20px; text-align: center; }
+        .input-field { width: 100%; border: 1px solid #E5E7EB; border-radius: 12px; padding: 12px; outline: none; transition: 0.3s; text-align: right; }
+        .input-field:focus { border-color: #FBBF24; box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1); }
+        .btn-send { background: #FBBF24; color: #fff; font-weight: bold; border-radius: 12px; padding: 12px; width: 48%; }
+        .btn-back { background: #FBBF24; color: #fff; font-weight: bold; border-radius: 12px; padding: 12px; width: 48%; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col p-6 items-center justify-center">
+
+    <div class="w-full max-w-md space-y-6">
+        
+        <div class="rating-box">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">ما رأيك في واو بشاميل ؟؟</h3>
+            <div class="flex justify-center gap-2 text-3xl text-gray-200 cursor-pointer">
+                <i class="fa-solid fa-star hover:text-yellow-400 transition" onclick="this.classList.add('text-yellow-400')"></i>
+                <i class="fa-solid fa-star hover:text-yellow-400 transition" onclick="this.classList.add('text-yellow-400')"></i>
+                <i class="fa-solid fa-star hover:text-yellow-400 transition" onclick="this.classList.add('text-yellow-400')"></i>
+                <i class="fa-solid fa-star hover:text-yellow-400 transition" onclick="this.classList.add('text-yellow-400')"></i>
+                <i class="fa-solid fa-star text-yellow-400"></i> </div>
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-bold mb-2 text-right">رقم جوال</label>
+            <input type="tel" placeholder="سجل رقم الجوال" class="input-field" dir="rtl">
+        </div>
+
+        <div>
+            <label class="block text-gray-700 font-bold mb-2 text-right">الملاحظات والتقييم</label>
+            <textarea placeholder="سجل الملاحظات هنا" class="input-field h-24 resize-none"></textarea>
+        </div>
+
+        <div class="flex justify-between mt-4">
+            <button class="btn-back" onclick="window.location.href='index.html'">عودة <i class="fa-solid fa-chevron-left mr-1"></i></button>
+            <button class="btn-send">ارسال</button>
+        </div>
+
+    </div>
+
+</body>
+</html>
